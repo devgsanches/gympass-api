@@ -18,5 +18,3 @@ jobs:
       - run: npm ci # install exactly the same dependencies as in the package.json file
 
       - run: npm test # run the unit tests
-
-      - run: npm run test:cleanup # cleanup the test database

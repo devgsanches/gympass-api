@@ -115,7 +115,7 @@ flowchart TD
 - [x] Listas paginadas com 20 itens por página
 - [x] Usuário identificado por JWT (JSON Web Token)
 
-## 🛠️ Stack Tecnológica
+## 🛠️ Stack
 
 **Backend:**
 
@@ -348,18 +348,6 @@ curl -X GET "http://localhost:3333/gyms/nearby?latitude=-27.2092052&longitude=-4
     -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
-## 🤝 Contribuição
-
-1. Faça um fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`)
-3. Commit suas mudanças (`git commit -am 'Adiciona nova feature'`)
-4. Push para a branch (`git push origin feature/nova-feature`)
-5. Abra um Pull Request
-
-## 📄 Licença
-
-Este projeto está sob a licença ISC. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
-
 ## 🏗️ Arquitetura
 
 O projeto segue os princípios SOLID e utiliza:
@@ -369,7 +357,3 @@ O projeto segue os princípios SOLID e utiliza:
 - **Dependency Injection** - Inversão de dependências
 - **Factory Pattern** - Criação de instâncias dos use cases
 - **Clean Architecture** - Separação clara das responsabilidades
-
----
-
-Desenvolvido com ❤️ usando Node.js, TypeScript e Fastify

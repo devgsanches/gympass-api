@@ -12,8 +12,7 @@
     "test:e2e": "vitest run --project e2e",
     "test:watch": "vitest --project unit",
     "test:e2e:watch": "vitest --project e2e",
-    "test:coverage": "vitest run --coverage",
-    "test:cleanup": "tsx prisma/vitest-environment-prisma/cleanup-schemas.ts"
+    "test:coverage": "vitest run --coverage"
   },
   "keywords": [],
   "author": "",

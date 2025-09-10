@@ -8,6 +8,77 @@
 
 Uma API RESTful desenvolvida com princípios SOLID para um sistema de check-ins em academias, similar ao GymPass. A aplicação permite que usuários se cadastrem, façam check-ins em academias próximas e administradores gerenciem academias e validem check-ins.
 
+## 📊 Fluxo Principal - Check-in em Academia
+
+O diagrama abaixo ilustra o fluxo mais importante da aplicação: o processo de check-in de um usuário em uma academia.
+
+```mermaid
+sequenceDiagram
+    participant U as 👤 Usuário
+    participant API as 🌐 API
+    participant Auth as 🔐 Auth Middleware
+    participant UC as 📋 Create Check-in Use Case
+    participant GR as 🏪 Gym Repository
+    participant CR as ✅ Check-in Repository
+    participant DB as 🗄️ PostgreSQL
+
+    U->>API: POST /check-ins
+    Note over U,API: { gymId, latitude, longitude }
+
+    API->>Auth: Verificar JWT Token
+    Auth-->>API: ✅ Token válido (userId)
+
+    API->>UC: Executar caso de uso
+    Note over UC: Aplicar regras de negócio
+
+    UC->>GR: Buscar academia por ID
+    GR->>DB: SELECT gym WHERE id = gymId
+    DB-->>GR: 📍 Dados da academia
+    GR-->>UC: Academia encontrada
+
+    UC->>UC: Validar distância (100m)
+    Note over UC: Calcular distância entre<br/>coordenadas do usuário<br/>e da academia
+
+    UC->>CR: Verificar check-in do dia
+    CR->>DB: SELECT check-in WHERE userId<br/>AND DATE(createdAt) = TODAY
+    DB-->>CR: 📋 Check-ins do dia
+    CR-->>UC: Resultado da verificação
+
+    alt ❌ Validações falharam
+        UC-->>API: Erro (distância/check-in duplicado)
+        API-->>U: 400 Bad Request
+    else ✅ Validações passaram
+        UC->>CR: Criar novo check-in
+        CR->>DB: INSERT INTO check_ins
+        DB-->>CR: ✅ Check-in criado
+        CR-->>UC: Check-in salvo
+        UC-->>API: 🎉 Check-in realizado
+        API-->>U: 201 Created
+    end
+```
+
+### 🔍 Regras de Negócio Aplicadas
+
+1. **Autenticação**: Usuário deve estar logado (JWT válido)
+2. **Proximidade**: Usuário deve estar a no máximo 100m da academia
+3. **Unicidade**: Apenas 1 check-in por dia por usuário
+4. **Academia**: Academia deve existir no sistema
+
+### ⏱️ Validação de Check-in (Administradores)
+
+```mermaid
+flowchart TD
+    A[🔧 Admin inicia validação] --> B{Check-in existe?}
+    B -->|❌ Não| C[404 Not Found]
+    B -->|✅ Sim| D{Dentro de 20min?}
+    D -->|❌ Não| E[400 Tempo expirado]
+    D -->|✅ Sim| F{Já validado?}
+    F -->|✅ Sim| G[400 Já validado]
+    F -->|❌ Não| H[✅ Validar check-in]
+    H --> I[💾 Salvar no banco]
+    I --> J[🎉 200 OK - Validado]
+```
+
 ## 🚀 Funcionalidades
 
 ### ✅ Requisitos Funcionais (RFs)
@@ -274,79 +345,20 @@ curl -X POST http://localhost:3333/auth/login \
 
 ```bash
 curl -X GET "http://localhost:3333/gyms/nearby?latitude=-27.2092052&longitude=-49.6401091" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+    -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
-## 📊 Fluxo Principal - Check-in em Academia
+## 🤝 Contribuição
 
-O diagrama abaixo ilustra o fluxo mais importante da aplicação: o processo de check-in de um usuário em uma academia.
+1. Faça um fork do projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`)
+3. Commit suas mudanças (`git commit -am 'Adiciona nova feature'`)
+4. Push para a branch (`git push origin feature/nova-feature`)
+5. Abra um Pull Request
 
-```mermaid
-sequenceDiagram
-    participant U as 👤 Usuário
-    participant API as 🌐 API
-    participant Auth as 🔐 Auth Middleware
-    participant UC as 📋 Create Check-in Use Case
-    participant GR as 🏪 Gym Repository
-    participant CR as ✅ Check-in Repository
-    participant DB as 🗄️ PostgreSQL
+## 📄 Licença
 
-    U->>API: POST /check-ins
-    Note over U,API: { gymId, latitude, longitude }
-
-    API->>Auth: Verificar JWT Token
-    Auth-->>API: ✅ Token válido (userId)
-
-    API->>UC: Executar caso de uso
-    Note over UC: Aplicar regras de negócio
-
-    UC->>GR: Buscar academia por ID
-    GR->>DB: SELECT gym WHERE id = gymId
-    DB-->>GR: 📍 Dados da academia
-    GR-->>UC: Academia encontrada
-
-    UC->>UC: Validar distância (100m)
-    Note over UC: Calcular distância entre<br/>coordenadas do usuário<br/>e da academia
-
-    UC->>CR: Verificar check-in do dia
-    CR->>DB: SELECT check-in WHERE userId<br/>AND DATE(createdAt) = TODAY
-    DB-->>CR: 📋 Check-ins do dia
-    CR-->>UC: Resultado da verificação
-
-    alt ❌ Validações falharam
-        UC-->>API: Erro (distância/check-in duplicado)
-        API-->>U: 400 Bad Request
-    else ✅ Validações passaram
-        UC->>CR: Criar novo check-in
-        CR->>DB: INSERT INTO check_ins
-        DB-->>CR: ✅ Check-in criado
-        CR-->>UC: Check-in salvo
-        UC-->>API: 🎉 Check-in realizado
-        API-->>U: 201 Created
-    end
-```
-
-### 🔍 Regras de Negócio Aplicadas
-
-1. **Autenticação**: Usuário deve estar logado (JWT válido)
-2. **Proximidade**: Usuário deve estar a no máximo 100m da academia
-3. **Unicidade**: Apenas 1 check-in por dia por usuário
-4. **Academia**: Academia deve existir no sistema
-
-### ⏱️ Validação de Check-in (Administradores)
-
-```mermaid
-flowchart TD
-    A[🔧 Admin inicia validação] --> B{Check-in existe?}
-    B -->|❌ Não| C[404 Not Found]
-    B -->|✅ Sim| D{Dentro de 20min?}
-    D -->|❌ Não| E[400 Tempo expirado]
-    D -->|✅ Sim| F{Já validado?}
-    F -->|✅ Sim| G[400 Já validado]
-    F -->|❌ Não| H[✅ Validar check-in]
-    H --> I[💾 Salvar no banco]
-    I --> J[🎉 200 OK - Validado]
-```
+Este projeto está sob a licença ISC. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
 ## 🏗️ Arquitetura
 
@@ -357,3 +369,7 @@ O projeto segue os princípios SOLID e utiliza:
 - **Dependency Injection** - Inversão de dependências
 - **Factory Pattern** - Criação de instâncias dos use cases
 - **Clean Architecture** - Separação clara das responsabilidades
+
+---
+
+Desenvolvido com ❤️ usando Node.js, TypeScript e Fastify

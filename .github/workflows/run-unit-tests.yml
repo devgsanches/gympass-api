@@ -1,0 +1,22 @@
+name: Run Unit Tests
+
+on: [push]
+
+jobs:
+  run-unit-tests:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5 # download the code from the repository on the ubuntu machine
+
+      - uses: actions/setup-node@v5 # install node.js (12 - 14)
+        with:
+          node-version: 18
+          cache: 'npm' # cache the npm packages | only install again if any new dependencies are included
+
+      - run: npm ci # install exactly the same dependencies as in the package.json file
+
+      - run: npm test # run the unit tests
+
+      - run: npm run test:cleanup # cleanup the test database

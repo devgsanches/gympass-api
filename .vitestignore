@@ -1,0 +1,9 @@
+generated/
+node_modules/
+dist/
+coverage/
+.env*
+package-lock.json
+yarn.lock
+prisma/generated/
+prisma/migrations/
